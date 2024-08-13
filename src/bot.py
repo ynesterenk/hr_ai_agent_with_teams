@@ -29,8 +29,11 @@ model = OpenAIModel(
     
 prompts = PromptManager(PromptManagerOptions(prompts_folder=f"{os.getcwd()}/prompts"))
 
-my_data_source = MyDataSource('local-search')
-prompts.add_data_source(my_data_source)
+#my_data_source = MyDataSource('local-search')
+epam_confluence_data_source = MyDataSource('epam-confluence', api_key=config.EPAM_CONFLUENCE_API_KEY, base_url=config.EPAM_CONFLUENCE_BASE_URL)
+#prompts.add_data_source(my_data_source)
+prompts.add_data_source(epam_confluence_data_source)
+
 
 planner = ActionPlanner(
     ActionPlannerOptions(model=model, prompts=prompts, default_prompt="chat")

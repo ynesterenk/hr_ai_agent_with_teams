@@ -17,7 +17,7 @@
   "augmentation": {
       "augmentation_type": "sequence",
       "data_sources": {
-        "local-search": 1200
+        "epam-confluence": 1200
       }
    }
 }

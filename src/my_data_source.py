@@ -1,6 +1,8 @@
 import os
 from dataclasses import dataclass
+from typing import List
 
+import requests
 from teams.ai.tokenizers import Tokenizer
 from teams.ai.data_sources import DataSource
 from teams.state.state import TurnContext
@@ -14,19 +16,18 @@ class Result:
 
 class MyDataSource(DataSource):
     """
-    A data source that searches through a local directory of files for a given query.
+    A data source that searches through Confluence for a given query.
     """
 
-    def __init__(self, name):
+    def __init__(self, name, api_key=None, base_url=None):
         """
-        Creates a new instance of the LocalDataSource instance.
+        Creates a new instance of the MyDataSource instance.
         Initializes the data source.
         """
         self.name = name
-        
-        filePath = os.path.join(os.path.dirname(__file__), 'data')
-        files = os.listdir(filePath)
-        self._data = [open(os.path.join(filePath, file), 'r').read() for file in files]
+        self.api_key = api_key
+        self.base_url = base_url
+        self._data = []
         
     def name(self):
         return self.name
@@ -39,24 +40,35 @@ class MyDataSource(DataSource):
         query = memory.get('temp.input')
         if not query:
             return Result('', 0, False)
-        
-        result=''
-        # Text search
-        for data in self._data:
-            if query in data:
-                result += data
-        # Key word search
-        #if 'history' in query.lower() or 'company' in query.lower():
-         #   result += self._data[0]
-        #if 'perksplus' in query.lower() or 'program' in query.lower():
-         #   result += self._data[1]
-        #if 'northwind' in query.lower() or 'health' in query.lower():
-            result += self._data[2]
-       
-        return Result(self.formatDocument(result), len(result), False) if result!='' else Result('', 0, False)
 
-    def formatDocument(self, result):
+        # Fetch data from Confluence
+        result = self.search_confluence(query)
+        
+        return Result(self.formatDocument(result), len(result), False) if result else Result('', 0, False)
+
+    def search_confluence(self, query: str) -> str:
         """
-        Formats the result string 
+        Search for the query in Confluence.
+        """
+        headers = {
+            'Authorization': f'Bearer {self.api_key}',
+            'Content-Type': 'application/json',
+        }
+        params = {
+            'cql': f'text ~ "{query}"',
+        }
+        
+        #response = requests.get(f'{self.base_url}/dosearchsite.action?queryString=', headers=headers, params=params)
+        response = requests.get(f'{self.base_url}/rest/api/content/search', headers=headers, params=params)
+        response.raise_for_status()
+        
+        results = response.json().get('results', [])
+        combined_results = ' '.join([result.get('title', {}) for result in results[:100]])
+        
+        return combined_results
+
+    def formatDocument(self, result: str) -> str:
+        """
+        Formats the result string.
         """
         return f"<context>{result}</context>"

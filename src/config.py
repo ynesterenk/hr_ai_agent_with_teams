@@ -18,3 +18,5 @@ class Config:
     AZURE_OPENAI_API_KEY = os.environ["AZURE_OPENAI_API_KEY"] # Azure OpenAI API key
     AZURE_OPENAI_MODEL_DEPLOYMENT_NAME = os.environ["AZURE_OPENAI_MODEL_DEPLOYMENT_NAME"] # Azure OpenAI model deployment name
     AZURE_OPENAI_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"] # Azure OpenAI endpoint
+    EPAM_CONFLUENCE_API_KEY = os.environ.get("EPAM_CONFLUENCE_API_KEY", "ViapjXMJBhOkibK2Mj8YQomFNXo7YrA270gwOj")
+    EPAM_CONFLUENCE_BASE_URL = "https://kb.epam.com"
