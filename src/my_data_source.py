@@ -26,7 +26,7 @@ class MyDataSource(DataSource):
         """
         self.name = name
         self.api_key = api_key
-        self.base_url = base_url
+        self.base_url = base_url if base_url else 'https://kb.epam.com'
         self._data = []
         
     def name(self):
@@ -57,13 +57,11 @@ class MyDataSource(DataSource):
         params = {
             'cql': f'text ~ "{query}"',
         }
-        
-        #response = requests.get(f'{self.base_url}/dosearchsite.action?queryString=', headers=headers, params=params)
         response = requests.get(f'{self.base_url}/rest/api/content/search', headers=headers, params=params)
         response.raise_for_status()
         
         results = response.json().get('results', [])
-        combined_results = ' '.join([result.get('title', {}) for result in results[:100]])
+        combined_results = ' '.join([result.get('body', {}).get('storage', {}).get('value', '') for result in results])
         
         return combined_results
 
